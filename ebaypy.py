@@ -10,7 +10,7 @@ CLIENT_SECRET = ""
 
 # Email configuration
 SMTP_SERVER = ""
-SMTP_PORT =
+SMTP_PORT = 1
 SMTP_USER = ""
 SMTP_PASSWORD = ""
 RECIPIENT = ""
@@ -128,8 +128,8 @@ def filter_items(items):
 
 
 def main():
-    email_body = ""
     token = get_oauth_token()
+    email_body = ""  # accumulate all results here
 
     for query in QUERIES:
         print(f"\n🔍 Searching for: {query}")
@@ -139,6 +139,8 @@ def main():
         if not filtered:
             print("No matching auctions found.")
             continue
+
+        email_body += f"\n\n===========================\nResults for query: {query}\n===========================\n"
 
         for item in filtered:
             print("\n---------------------------")
@@ -159,9 +161,13 @@ def main():
                 f"Item URL: {item['url']}\n"
             )
 
-        send_email("eBay Auction Results " + query, email_body)
-        email_body = ""
-        print("Email sent to address")
+    # Only send email if we actually found something
+    if email_body.strip():
+        send_email("eBay Auction Results", email_body)
+        print("Single email sent with all results.")
+    else:
+        print("No matching auctions found for any query. No email sent.")
+
 
 
 if __name__ == "__main__":
